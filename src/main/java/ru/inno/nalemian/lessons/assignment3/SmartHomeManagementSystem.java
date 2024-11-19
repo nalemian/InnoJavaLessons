@@ -39,158 +39,272 @@ public class SmartHomeManagementSystem {
         String[] tokens = command.split(" ");
         String action = tokens[0];
 
-        try {
-            switch (action) {
-                case "TurnOn":
-                    String turnOnName = tokens[1];
-                    int turnOnId = Integer.parseInt(tokens[2]);
-                    SmartDevice turnOnDevice = findDevice(turnOnName, turnOnId, devices);
-                    if (turnOnDevice != null) {
-                        if (turnOnDevice.isOn()) {
-                            System.out.println(turnOnName + " " + turnOnId + " is already on");
-                        } else {
-                            turnOnDevice.turnOn();
-                        }
-                    } else {
-                        System.out.println("The smart device was not found");
-                    }
-                    break;
-
-                case "TurnOff":
-                    String turnOffName = tokens[1];
-                    int turnOffId = Integer.parseInt(tokens[2]);
-                    SmartDevice turnOffDevice = findDevice(turnOffName, turnOffId, devices);
-                    if (turnOffDevice != null) {
-                        if (!turnOffDevice.isOn()) {
-                            System.out.println(turnOffName + " " + turnOffId + " is already off");
-                        } else {
-                            turnOffDevice.turnOff();
-                        }
-                    } else {
-                        System.out.println("The smart device was not found");
-                    }
-                    break;
-
-                case "StartCharging":
-                    String chargingName = tokens[1];
-                    int chargingId = Integer.parseInt(tokens[2]);
-                    SmartDevice chargingDevice = findDevice(chargingName, chargingId, devices);
-                    if (chargingDevice != null) {
-                        if (chargingDevice instanceof Light || chargingDevice instanceof Camera) {
-                            ((Chargeable) chargingDevice).startCharging();
-                        } else {
-                            System.out.println(chargingName + " " + chargingId + " is not chargeable");
-                        }
-                    } else {
-                        System.out.println("The smart device was not found");
-                    }
-                    break;
-
-                case "StopCharging":
-                    String stopChargingName = tokens[1];
-                    int stopChargingId = Integer.parseInt(tokens[2]);
-                    SmartDevice stopChargingDevice = findDevice(stopChargingName, stopChargingId, devices);
-                    if (stopChargingDevice != null) {
-                        if (stopChargingDevice instanceof Light || stopChargingDevice instanceof Camera) {
-                            ((Chargeable) stopChargingDevice).stopCharging();
-                        } else {
-                            System.out.println(stopChargingName + " " + stopChargingId + " is not chargeable");
-                        }
-                    } else {
-                        System.out.println("The smart device was not found");
-                    }
-                    break;
-
-                case "SetTemperature":
-                    String tempName = tokens[1];
-                    int tempId = Integer.parseInt(tokens[2]);
-                    int temperature = Integer.parseInt(tokens[3]);
-                    SmartDevice tempDevice = findDevice(tempName, tempId, devices);
-                    if (tempDevice instanceof Heater) {
-                        ((Heater) tempDevice).setTemperature(temperature);
-                    } else {
-                        System.out.println(tempName + " " + tempId + " is not a heater");
-                    }
-                    break;
-
-                case "SetBrightness":
-                    String brightnessName = tokens[1];
-                    int brightnessId = Integer.parseInt(tokens[2]);
-                    String brightnessLevel = tokens[3];
-                    SmartDevice brightnessDevice = findDevice(brightnessName, brightnessId, devices);
-                    if (brightnessDevice instanceof Light) {
-                        if (brightnessLevel.equals("LOW") || brightnessLevel.equals("MEDIUM") || brightnessLevel.equals("HIGH")) {
-                            ((Light) brightnessDevice).setBrightnessLevel(BrightnessLevel.valueOf(brightnessLevel.toUpperCase()));
-                        } else {
-                            System.out.println("The brightness can only be one of \"LOW\", \"MEDIUM\", or \"HIGH\"");
-                        }
-                    } else {
-                        System.out.println(brightnessName + " " + brightnessId + " is not a light");
-                    }
-                    break;
-
-                case "SetColor":
-                    String colorName = tokens[1];
-                    int colorId = Integer.parseInt(tokens[2]);
-                    String color = tokens[3];
-                    SmartDevice colorDevice = findDevice(colorName, colorId, devices);
-                    if (colorDevice instanceof Light) {
-                        if (color.equals("YELLOW") || color.equals("WHITE")) {
-                            ((Light) colorDevice).setLightColor(LightColor.valueOf(color.toUpperCase()));
-                        } else {
-                            System.out.println("The light color can only be \"YELLOW\" or \"WHITE\"");
-                        }
-                    } else {
-                        System.out.println(colorName + " " + colorId + " is not a light");
-                    }
-                    break;
-
-                case "SetAngle":
-                    String angleName = tokens[1];
-                    int angleId = Integer.parseInt(tokens[2]);
-                    int angle = Integer.parseInt(tokens[3]);
-                    SmartDevice angleDevice = findDevice(angleName, angleId, devices);
-                    if (angleDevice instanceof Camera) {
-                        ((Camera) angleDevice).setCameraAngle(angle);
-                    } else {
-                        System.out.println(angleName + " " + angleId + " is not a camera");
-                    }
-                    break;
-
-                case "StartRecording":
-                    String startRecName = tokens[1];
-                    int startRecId = Integer.parseInt(tokens[2]);
-                    SmartDevice startRecDevice = findDevice(startRecName, startRecId, devices);
-                    if (startRecDevice instanceof Camera) {
-                        ((Camera) startRecDevice).startRecording();
-                    } else {
-                        System.out.println(startRecName + " " + startRecId + " is not a camera");
-                    }
-                    break;
-
-                case "StopRecording":
-                    String stopRecName = tokens[1];
-                    int stopRecId = Integer.parseInt(tokens[2]);
-                    SmartDevice stopRecDevice = findDevice(stopRecName, stopRecId, devices);
-                    if (stopRecDevice instanceof Camera) {
-                        ((Camera) stopRecDevice).stopRecording();
-                    } else {
-                        System.out.println(stopRecName + " " + stopRecId + " is not a camera");
-                    }
-                    break;
-
-                case "DisplayAllStatus":
-                    for (SmartDevice device : devices) {
-                        System.out.println(device.displayStatus());
-                    }
-                    break;
-
-                default:
-                    System.out.println("Invalid command");
-                    break;
+        if (action.equals("DisplayAllStatus")) {
+            if (tokens.length != 1) {
+                System.out.println("Invalid command");
+            } else {
+                for (SmartDevice device : devices) {
+                    System.out.println(device.displayStatus());
+                }
             }
-        } catch (Exception e) {
-            System.out.println("Invalid command");
+        } else {
+            if (tokens.length > 1) {
+                try {
+                    switch (action) {
+                        case "TurnOn":
+
+                            if (tokens.length != 3) {
+                                System.out.println("Invalid command");
+                            } else {
+                                if ((!(tokens[1].equals("Camera")) & !(tokens[1].equals("Heater")) & !(tokens[1].equals("Light"))) || (Integer.parseInt(tokens[2]) > 9 || Integer.parseInt(tokens[2]) < 0)) {
+                                    System.out.println("The smart device was not found");
+                                } else {
+                                    String turnOnName = tokens[1];
+                                    int turnOnId = Integer.parseInt(tokens[2]);
+                                    SmartDevice turnOnDevice = findDevice(turnOnName, turnOnId, devices);
+                                    if (turnOnDevice != null) {
+                                        if (turnOnDevice.isOn()) {
+                                            System.out.println(turnOnName + " " + turnOnId + " is already on");
+                                        } else {
+                                            turnOnDevice.turnOn();
+                                        }
+                                    } else {
+                                        System.out.println("The smart device was not found");
+                                    }
+                                }
+                            }
+                            break;
+
+                        case "TurnOff":
+                            if (tokens.length != 3) {
+                                System.out.println("Invalid command");
+                            } else {
+                                if ((!(tokens[1].equals("Camera")) & !(tokens[1].equals("Heater")) & !(tokens[1].equals("Light"))) || (Integer.parseInt(tokens[2]) > 9 || Integer.parseInt(tokens[2]) < 0)) {
+                                    System.out.println("The smart device was not found");
+                                } else {
+                                    String turnOffName = tokens[1];
+                                    int turnOffId = Integer.parseInt(tokens[2]);
+                                    SmartDevice turnOffDevice = findDevice(turnOffName, turnOffId, devices);
+                                    if (turnOffDevice != null) {
+                                        if (!turnOffDevice.isOn()) {
+                                            System.out.println(turnOffName + " " + turnOffId + " is already off");
+                                        } else {
+                                            turnOffDevice.turnOff();
+                                        }
+                                    } else {
+                                        System.out.println("The smart device was not found");
+                                    }
+                                }
+                            }
+                            break;
+
+                        case "StartCharging":
+
+                            if (tokens.length != 3) {
+                                System.out.println("Invalid command");
+                            } else {
+                                if ((!(tokens[1].equals("Camera")) & !(tokens[1].equals("Heater")) & !(tokens[1].equals("Light"))) || (Integer.parseInt(tokens[2]) > 9 || Integer.parseInt(tokens[2]) < 0)) {
+                                    System.out.println("The smart device was not found");
+                                } else {
+                                    String chargingName = tokens[1];
+                                    int chargingId = Integer.parseInt(tokens[2]);
+                                    SmartDevice chargingDevice = findDevice(chargingName, chargingId, devices);
+                                    if (chargingDevice != null) {
+                                        if (chargingDevice instanceof Light || chargingDevice instanceof Camera) {
+                                            ((Chargeable) chargingDevice).startCharging();
+                                        } else {
+                                            System.out.println(chargingName + " " + chargingId + " is not chargeable");
+                                        }
+                                    } else {
+                                        System.out.println("The smart device was not found");
+                                    }
+                                }
+                            }
+                            break;
+
+                        case "StopCharging":
+                            if (tokens.length != 3) {
+                                System.out.println("Invalid command");
+                            } else {
+                                if ((!(tokens[1].equals("Camera")) & !(tokens[1].equals("Heater")) & !(tokens[1].equals("Light"))) || (Integer.parseInt(tokens[2]) > 9 || Integer.parseInt(tokens[2]) < 0)) {
+                                    System.out.println("The smart device was not found");
+                                } else {
+                                    String stopChargingName = tokens[1];
+                                    int stopChargingId = Integer.parseInt(tokens[2]);
+                                    SmartDevice stopChargingDevice = findDevice(stopChargingName, stopChargingId, devices);
+                                    if (stopChargingDevice != null) {
+                                        if (stopChargingDevice instanceof Light || stopChargingDevice instanceof Camera) {
+                                            ((Chargeable) stopChargingDevice).stopCharging();
+                                        } else {
+                                            System.out.println(stopChargingName + " " + stopChargingId + " is not chargeable");
+                                        }
+                                    } else {
+                                        System.out.println("The smart device was not found");
+                                    }
+                                }
+                            }
+                            break;
+
+                        case "SetTemperature":
+                            if (tokens.length != 4) {
+                                System.out.println("Invalid command");
+                            } else {
+                                if ((!(tokens[1].equals("Camera")) & !(tokens[1].equals("Heater")) & !(tokens[1].equals("Light"))) || (Integer.parseInt(tokens[2]) > 9 || Integer.parseInt(tokens[2]) < 0)) {
+                                    System.out.println("The smart device was not found");
+                                } else {
+                                    String tempName = tokens[1];
+                                    int tempId = Integer.parseInt(tokens[2]);
+                                    int temperature = Integer.parseInt(tokens[3]);
+                                    SmartDevice tempDevice = findDevice(tempName, tempId, devices);
+                                    if (tempDevice.getStatus() == Status.OFF) {
+                                        System.out.println("You can't change the status of the " + tempDevice.getClass().getSimpleName() + " " + tempDevice.getDeviceId() + " while it is off");
+                                    } else {
+                                        if (tempDevice instanceof Heater) {
+                                            ((Heater) tempDevice).setTemperature(temperature);
+                                        } else {
+                                            System.out.println(tempName + " " + tempId + " is not a heater");
+                                        }
+                                    }
+                                }
+                            }
+                            break;
+
+                        case "SetBrightness":
+                            if (tokens.length != 4) {
+                                System.out.println("Invalid command");
+                            } else {
+                                if ((!(tokens[1].equals("Camera")) & !(tokens[1].equals("Heater")) & !(tokens[1].equals("Light"))) || (Integer.parseInt(tokens[2]) > 9 || Integer.parseInt(tokens[2]) < 0)) {
+                                    System.out.println("The smart device was not found");
+                                } else {
+                                    String brightnessName = tokens[1];
+                                    int brightnessId = Integer.parseInt(tokens[2]);
+                                    String brightnessLevel = tokens[3];
+                                    SmartDevice brightnessDevice = findDevice(brightnessName, brightnessId, devices);
+                                    if (brightnessDevice.getStatus() == Status.OFF) {
+                                        System.out.println("You can't change the status of the " + brightnessDevice.getClass().getSimpleName() + " " + brightnessDevice.getDeviceId() + " while it is off");
+                                    } else {
+                                        if (brightnessDevice instanceof Light) {
+                                            if (brightnessLevel.equals("LOW") || brightnessLevel.equals("MEDIUM") || brightnessLevel.equals("HIGH")) {
+                                                ((Light) brightnessDevice).setBrightnessLevel(BrightnessLevel.valueOf(brightnessLevel.toUpperCase()));
+                                            } else {
+                                                System.out.println("The brightness can only be one of \"LOW\", \"MEDIUM\", or \"HIGH\"");
+                                            }
+                                        } else {
+                                            System.out.println(brightnessName + " " + brightnessId + " is not a light");
+                                        }
+                                    }
+                                }
+                            }
+                            break;
+
+                        case "SetColor":
+                            if (tokens.length != 4) {
+                                System.out.println("Invalid command");
+                            } else {
+                                if ((!(tokens[1].equals("Camera")) & !(tokens[1].equals("Heater")) & !(tokens[1].equals("Light"))) || (Integer.parseInt(tokens[2]) > 9 || Integer.parseInt(tokens[2]) < 0)) {
+                                    System.out.println("The smart device was not found");
+                                } else {
+                                    String colorName = tokens[1];
+                                    int colorId = Integer.parseInt(tokens[2]);
+                                    String color = tokens[3];
+                                    SmartDevice colorDevice = findDevice(colorName, colorId, devices);
+                                    if (colorDevice.getStatus() == Status.OFF) {
+                                        System.out.println("You can't change the status of the " + colorDevice.getClass().getSimpleName() + " " + colorDevice.getDeviceId() + " while it is off");
+                                    } else {
+
+                                        if (colorDevice instanceof Light) {
+                                            if (color.equals("YELLOW") || color.equals("WHITE")) {
+                                                ((Light) colorDevice).setLightColor(LightColor.valueOf(color.toUpperCase()));
+                                            } else {
+                                                System.out.println("The light color can only be \"YELLOW\" or \"WHITE\"");
+                                            }
+                                        } else {
+                                            System.out.println(colorName + " " + colorId + " is not a light");
+                                        }
+                                    }
+                                }
+                            }
+                            break;
+
+                        case "SetAngle":
+                            if (tokens.length != 4) {
+                                System.out.println("Invalid command");
+                            } else {
+                                if ((!(tokens[1].equals("Camera")) & !(tokens[1].equals("Heater")) & !(tokens[1].equals("Light"))) || (Integer.parseInt(tokens[2]) > 9 || Integer.parseInt(tokens[2]) < 0)) {
+                                    System.out.println("The smart device was not found");
+                                } else {
+                                    String angleName = tokens[1];
+                                    int angleId = Integer.parseInt(tokens[2]);
+                                    int angle = Integer.parseInt(tokens[3]);
+                                    SmartDevice angleDevice = findDevice(angleName, angleId, devices);
+                                    if (angleDevice.getStatus() == Status.OFF) {
+                                        System.out.println("You can't change the status of the " + angleDevice.getClass().getSimpleName() + " " + angleDevice.getDeviceId() + " while it is off");
+                                    } else {
+                                        if (angleDevice instanceof Camera) {
+                                            ((Camera) angleDevice).setCameraAngle(angle);
+                                        } else {
+                                            System.out.println(angleName + " " + angleId + " is not a camera");
+                                        }
+                                    }
+                                }
+                            }
+                            break;
+
+                        case "StartRecording":
+                            if (tokens.length != 3) {
+                                System.out.println("Invalid command");
+                            } else {
+                                if ((!(tokens[1].equals("Camera")) & !(tokens[1].equals("Heater")) & !(tokens[1].equals("Light"))) || (Integer.parseInt(tokens[2]) > 9 || Integer.parseInt(tokens[2]) < 0)) {
+                                    System.out.println("The smart device was not found");
+                                } else {
+                                    String startRecName = tokens[1];
+                                    int startRecId = Integer.parseInt(tokens[2]);
+                                    SmartDevice startRecDevice = findDevice(startRecName, startRecId, devices);
+                                    if (startRecDevice.getStatus() == Status.OFF) {
+                                        System.out.println("You can't change the status of the " + startRecDevice.getClass().getSimpleName() + " " + startRecDevice.getDeviceId() + " while it is off");
+                                    } else {
+                                        if (startRecDevice instanceof Camera) {
+                                            ((Camera) startRecDevice).startRecording();
+                                        } else {
+                                            System.out.println(startRecName + " " + startRecId + " is not a camera");
+                                        }
+                                    }
+                                }
+                            }
+                            break;
+
+
+                        case "StopRecording":
+                            if (tokens.length != 3) {
+                                System.out.println("Invalid command");
+                            } else {
+                                if ((!(tokens[1].equals("Camera")) & !(tokens[1].equals("Heater")) & !(tokens[1].equals("Light"))) || (Integer.parseInt(tokens[2]) > 9 || Integer.parseInt(tokens[2]) < 0)) {
+                                    System.out.println("The smart device was not found");
+                                } else {
+                                    String stopRecName = tokens[1];
+                                    int stopRecId = Integer.parseInt(tokens[2]);
+                                    SmartDevice stopRecDevice = findDevice(stopRecName, stopRecId, devices);
+                                    if (stopRecDevice.getStatus() == Status.OFF) {
+                                        System.out.println("You can't change the status of the " + stopRecDevice.getClass().getSimpleName() + " " + stopRecDevice.getDeviceId() + " while it is off");
+                                    } else {
+                                        if (stopRecDevice instanceof Camera) {
+                                            ((Camera) stopRecDevice).stopRecording();
+                                        } else {
+                                            System.out.println(stopRecName + " " + stopRecId + " is not a camera");
+                                        }
+                                    }
+                                }
+                            }
+                            break;
+
+                        default:
+                            System.out.println("Invalid command");
+                            break;
+                    }
+                } catch (Exception e) {
+                    System.out.println("Invalid command");
+                }
+            }
         }
     }
 }
@@ -417,10 +531,6 @@ class Camera extends SmartDevice implements Chargeable {
     }
 
     public boolean startRecording() {
-        if (this.getStatus() == Status.OFF) {
-            System.out.println("You can't change the status of the Camera " + this.getDeviceId() + " while it is off");
-            return false;
-        }
         if (recording) {
             System.out.println("Camera " + this.getDeviceId() + " is already recording");
             return false;
@@ -461,6 +571,7 @@ class Camera extends SmartDevice implements Chargeable {
             System.out.println("Camera " + this.getDeviceId() + " is already charging");
             return false;
         }
+        System.out.println("Camera " + this.getDeviceId() + " is charging");
         charging = true;
         return true;
     }
