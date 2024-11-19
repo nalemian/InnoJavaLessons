@@ -1,6 +1,6 @@
 package ru.kirill.nalemian;
 
-public class NumericValue {
+public class AlgorithmUtils {
     public static int getFibonacciNumber(int number) {
         if (number == 0) return 0;
         if (number == 1) return 1;
