@@ -26,6 +26,7 @@ public class SmartHomeManagementSystem {
         }
     }
 
+    //TODO replace List with Map
     public SmartDevice findDevice(String name, int id, List<SmartDevice> devices) {
         for (SmartDevice device : devices) {
             if (device.getClass().getSimpleName().equalsIgnoreCase(name) && device.getDeviceId() == id) {
@@ -52,7 +53,6 @@ public class SmartHomeManagementSystem {
                 try {
                     switch (action) {
                         case "TurnOn":
-
                             if (tokens.length != 3) {
                                 System.out.println("Invalid command");
                             } else {
@@ -316,19 +316,19 @@ enum LightColor {WHITE, YELLOW}
 enum Status {OFF, ON}
 
 interface Chargeable {
-    abstract boolean isCharging();
+    boolean isCharging();
 
-    abstract boolean startCharging();
+    boolean startCharging();
 
-    abstract boolean stopCharging();
+    boolean stopCharging();
 }
 
 interface Controllable {
-    abstract boolean turnOff();
+    boolean turnOff();
 
-    abstract boolean turnOn();
+    boolean turnOn();
 
-    abstract boolean isOn();
+    boolean isOn();
 }
 
 abstract class SmartDevice implements Controllable {
@@ -361,7 +361,7 @@ abstract class SmartDevice implements Controllable {
 
     @Override
     public boolean turnOff() {
-        if (status == Status.OFF) {
+        if (Status.OFF.equals(status)) {
             System.out.println(getClass().getSimpleName() + " " + deviceId + " is already off");
             return false;
         }
@@ -372,7 +372,7 @@ abstract class SmartDevice implements Controllable {
 
     @Override
     public boolean turnOn() {
-        if (status == Status.ON) {
+        if (Status.ON.equals(status)) {
             System.out.println(getClass().getSimpleName() + " " + deviceId + " is already on");
             return false;
         }
@@ -383,7 +383,7 @@ abstract class SmartDevice implements Controllable {
 
     @Override
     public boolean isOn() {
-        return status == Status.ON;
+        return Status.ON.equals(status);
     }
 
     public boolean checkStatusAccess() {
@@ -408,7 +408,7 @@ class Light extends SmartDevice implements Chargeable {
     }
 
     public void setLightColor(LightColor lightColor) {
-        if (this.getStatus() == Status.OFF) {
+        if (Status.OFF.equals(this.getStatus())) {
             System.out.println("You can't change the status of the Light " + this.getDeviceId() + " while it is off");
         } else {
             this.lightColor = lightColor;
@@ -421,7 +421,7 @@ class Light extends SmartDevice implements Chargeable {
     }
 
     public void setBrightnessLevel(BrightnessLevel brightnessLevel) {
-        if (this.getStatus() == Status.OFF) {
+        if (Status.OFF.equals(this.getStatus())) {
             System.out.println("You can't change the status of the Light " + this.getDeviceId() + " while it is off");
         } else {
             this.brightnessLevel = brightnessLevel;
@@ -478,7 +478,7 @@ class Heater extends SmartDevice {
     }
 
     public boolean setTemperature(int temperature) {
-        if (this.getStatus() == Status.OFF) {
+        if (Status.OFF.equals(this.getStatus())) {
             System.out.println("You can't change the status of the Heater " + this.getDeviceId() + " while it is off");
             return false;
         }
@@ -531,6 +531,10 @@ class Camera extends SmartDevice implements Chargeable {
     }
 
     public boolean startRecording() {
+        if (Status.OFF.equals(this.getStatus())) {
+            System.out.println("You can't change the status of the Camera " + this.getDeviceId() + " while it is off");
+            return false;
+        }
         if (recording) {
             System.out.println("Camera " + this.getDeviceId() + " is already recording");
             return false;
@@ -541,7 +545,7 @@ class Camera extends SmartDevice implements Chargeable {
     }
 
     public boolean stopRecording() {
-        if (this.getStatus() == Status.OFF) {
+        if (Status.OFF.equals(this.getStatus())) {
             System.out.println("You can't change the status of the Camera " + this.getDeviceId() + " while it is off");
             return false;
         }
@@ -558,7 +562,6 @@ class Camera extends SmartDevice implements Chargeable {
         return recording;
     }
 
-    ;
 
     @Override
     public boolean isCharging() {
