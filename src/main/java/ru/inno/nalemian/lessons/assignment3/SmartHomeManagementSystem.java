@@ -5,17 +5,11 @@ import java.util.List;
 import java.util.Scanner;
 
 public class SmartHomeManagementSystem {
+
     public static void main(String[] args) {
-        List<SmartDevice> devices = new ArrayList<>();
-        for (int i = 0; i < 4; i++) {
-            devices.add(new Light(Status.ON, false, BrightnessLevel.LOW, LightColor.YELLOW));
-        }
-        for (int i = 0; i < 2; i++) {
-            devices.add(new Camera(Status.ON, false, false, 45));
-        }
-        for (int i = 0; i < 4; i++) {
-            devices.add(new Heater(Status.ON, 20));
-        }
+
+        List<SmartDevice> devices = generateListByTask();
+
         SmartHomeManagementSystem system = new SmartHomeManagementSystem();
         Scanner scanner = new Scanner(System.in);
         while (true) {
@@ -26,6 +20,20 @@ public class SmartHomeManagementSystem {
                 System.out.println(system.handleCommand(command, devices));
             }
         }
+    }
+
+    public static List<SmartDevice> generateListByTask(){
+        List<SmartDevice> devices = new ArrayList<>();
+        for (int i = 0; i < 4; i++) {
+            devices.add(new Light(Status.ON, false, BrightnessLevel.LOW, LightColor.YELLOW));
+        }
+        for (int i = 0; i < 2; i++) {
+            devices.add(new Camera(Status.ON, false, false, 45));
+        }
+        for (int i = 0; i < 4; i++) {
+            devices.add(new Heater(Status.ON, 20));
+        }
+        return devices;
     }
 
     public SmartDevice findDevice(String name, int id, List<SmartDevice> devices) {
