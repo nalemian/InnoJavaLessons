@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Проверка error-ов
  */
-class SmartHomeManagementSystemTestTestErrorOutput {
+class SmartHomeManagementSystemTest {
 
     @Test
     void testInvalidCommand() {
@@ -30,10 +30,10 @@ class SmartHomeManagementSystemTestTestErrorOutput {
         assertEquals("The smart device was not found", sha.handleCommand("StartCharging Camera 1", List.of()));
         assertEquals("The smart device was not found", sha.handleCommand("StopCharging Camera 1", List.of()));
         assertEquals("The smart device was not found", sha.handleCommand("StopCharging Camera 1", List.of()));
-        assertEquals("The smart device was not found", sha.handleCommand("SetTemperature Heater 1", List.of()));
-        assertEquals("The smart device was not found", sha.handleCommand("SetBrightness Light 1", List.of()));
-        assertEquals("The smart device was not found", sha.handleCommand("SetColor Camera 1", List.of()));
-        assertEquals("The smart device was not found", sha.handleCommand("SetAngle Camera 1", List.of()));
+        assertEquals("The smart device was not found", sha.handleCommand("SetTemperature Heater 1 45", List.of()));
+        assertEquals("The smart device was not found", sha.handleCommand("SetBrightness Light 1 LOW", List.of()));
+        assertEquals("The smart device was not found", sha.handleCommand("SetColor Camera 1 WHITE", List.of()));
+        assertEquals("The smart device was not found", sha.handleCommand("SetAngle Camera 1 45", List.of()));
         assertEquals("The smart device was not found", sha.handleCommand("StartRecording Camera 1", List.of()));
         assertEquals("The smart device was not found", sha.handleCommand("StopRecording Camera 1", List.of()));
     }
@@ -62,7 +62,7 @@ class SmartHomeManagementSystemTestTestErrorOutput {
 
         Heater heater = new Heater(Status.ON, 20);
         heater.setDeviceId(1);
-        assertEquals("Charging a non-chargeable device", sha.handleCommand(
+        assertEquals("Heater 1 is not chargeable", sha.handleCommand(
                 "StartCharging Heater 1", List.of(heater))
         );
     }
