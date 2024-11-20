@@ -5,7 +5,24 @@ import java.util.List;
 import java.util.Scanner;
 
 public class SmartHomeManagementSystem {
+
     public static void main(String[] args) {
+
+        List<SmartDevice> devices = generateListByTask();
+
+        SmartHomeManagementSystem system = new SmartHomeManagementSystem();
+        Scanner scanner = new Scanner(System.in);
+        while (true) {
+            String command = scanner.nextLine();
+            if (command.equals("end")) {
+                break;
+            } else {
+                System.out.println(system.handleCommand(command, devices));
+            }
+        }
+    }
+
+    public static List<SmartDevice> generateListByTask(){
         List<SmartDevice> devices = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
             devices.add(new Light(Status.ON, false, BrightnessLevel.LOW, LightColor.YELLOW));
@@ -16,14 +33,7 @@ public class SmartHomeManagementSystem {
         for (int i = 0; i < 4; i++) {
             devices.add(new Heater(Status.ON, 20));
         }
-        SmartHomeManagementSystem system = new SmartHomeManagementSystem();
-        Scanner scanner = new Scanner(System.in);
-        while (true) {
-            String command = scanner.nextLine();
-            if (command.equals("end")) {
-                break;
-            } else system.handleCommand(command, devices);
-        }
+        return devices;
     }
 
     //TODO replace List with Map
@@ -36,7 +46,7 @@ public class SmartHomeManagementSystem {
         return null;
     }
 
-    public void handleCommand(String command, List<SmartDevice> devices) {
+    public String handleCommand(String command, List<SmartDevice> devices) {
         String[] tokens = command.split(" ");
         String action = tokens[0];
 
@@ -64,12 +74,12 @@ public class SmartHomeManagementSystem {
                                     SmartDevice turnOnDevice = findDevice(turnOnName, turnOnId, devices);
                                     if (turnOnDevice != null) {
                                         if (turnOnDevice.isOn()) {
-                                            System.out.println(turnOnName + " " + turnOnId + " is already on");
+                                            return turnOnName + " " + turnOnId + " is already on";
                                         } else {
                                             turnOnDevice.turnOn();
                                         }
                                     } else {
-                                        System.out.println("The smart device was not found");
+                                        return "The smart device was not found";
                                     }
                                 }
                             }
@@ -87,12 +97,12 @@ public class SmartHomeManagementSystem {
                                     SmartDevice turnOffDevice = findDevice(turnOffName, turnOffId, devices);
                                     if (turnOffDevice != null) {
                                         if (!turnOffDevice.isOn()) {
-                                            System.out.println(turnOffName + " " + turnOffId + " is already off");
+                                            return turnOffName + " " + turnOffId + " is already off";
                                         } else {
                                             turnOffDevice.turnOff();
                                         }
                                     } else {
-                                        System.out.println("The smart device was not found");
+                                        return "The smart device was not found";
                                     }
                                 }
                             }
@@ -113,10 +123,10 @@ public class SmartHomeManagementSystem {
                                         if (chargingDevice instanceof Light || chargingDevice instanceof Camera) {
                                             ((Chargeable) chargingDevice).startCharging();
                                         } else {
-                                            System.out.println(chargingName + " " + chargingId + " is not chargeable");
+                                            return chargingName + " " + chargingId + " is not chargeable";
                                         }
                                     } else {
-                                        System.out.println("The smart device was not found");
+                                        return "The smart device was not found";
                                     }
                                 }
                             }
@@ -136,10 +146,10 @@ public class SmartHomeManagementSystem {
                                         if (stopChargingDevice instanceof Light || stopChargingDevice instanceof Camera) {
                                             ((Chargeable) stopChargingDevice).stopCharging();
                                         } else {
-                                            System.out.println(stopChargingName + " " + stopChargingId + " is not chargeable");
+                                            return stopChargingName + " " + stopChargingId + " is not chargeable";
                                         }
                                     } else {
-                                        System.out.println("The smart device was not found");
+                                        return "The smart device was not found";
                                     }
                                 }
                             }
@@ -162,7 +172,7 @@ public class SmartHomeManagementSystem {
                                         if (tempDevice instanceof Heater) {
                                             ((Heater) tempDevice).setTemperature(temperature);
                                         } else {
-                                            System.out.println(tempName + " " + tempId + " is not a heater");
+                                            return tempName + " " + tempId + " is not a heater";
                                         }
                                     }
                                 }
@@ -187,10 +197,10 @@ public class SmartHomeManagementSystem {
                                             if (brightnessLevel.equals("LOW") || brightnessLevel.equals("MEDIUM") || brightnessLevel.equals("HIGH")) {
                                                 ((Light) brightnessDevice).setBrightnessLevel(BrightnessLevel.valueOf(brightnessLevel.toUpperCase()));
                                             } else {
-                                                System.out.println("The brightness can only be one of \"LOW\", \"MEDIUM\", or \"HIGH\"");
+                                                return "The brightness can only be one of \"LOW\", \"MEDIUM\", or \"HIGH\"";
                                             }
                                         } else {
-                                            System.out.println(brightnessName + " " + brightnessId + " is not a light");
+                                            return brightnessName + " " + brightnessId + " is not a light";
                                         }
                                     }
                                 }
@@ -216,10 +226,10 @@ public class SmartHomeManagementSystem {
                                             if (color.equals("YELLOW") || color.equals("WHITE")) {
                                                 ((Light) colorDevice).setLightColor(LightColor.valueOf(color.toUpperCase()));
                                             } else {
-                                                System.out.println("The light color can only be \"YELLOW\" or \"WHITE\"");
+                                                return "The light color can only be \"YELLOW\" or \"WHITE\"";
                                             }
                                         } else {
-                                            System.out.println(colorName + " " + colorId + " is not a light");
+                                            return colorName + " " + colorId + " is not a light";
                                         }
                                     }
                                 }
@@ -243,7 +253,7 @@ public class SmartHomeManagementSystem {
                                         if (angleDevice instanceof Camera) {
                                             ((Camera) angleDevice).setCameraAngle(angle);
                                         } else {
-                                            System.out.println(angleName + " " + angleId + " is not a camera");
+                                            return angleName + " " + angleId + " is not a camera";
                                         }
                                     }
                                 }
@@ -266,7 +276,7 @@ public class SmartHomeManagementSystem {
                                         if (startRecDevice instanceof Camera) {
                                             ((Camera) startRecDevice).startRecording();
                                         } else {
-                                            System.out.println(startRecName + " " + startRecId + " is not a camera");
+                                            return startRecName + " " + startRecId + " is not a camera";
                                         }
                                     }
                                 }
@@ -276,21 +286,21 @@ public class SmartHomeManagementSystem {
 
                         case "StopRecording":
                             if (tokens.length != 3) {
-                                System.out.println("Invalid command");
+                                return "Invalid command";
                             } else {
                                 if ((!(tokens[1].equals("Camera")) & !(tokens[1].equals("Heater")) & !(tokens[1].equals("Light"))) || (Integer.parseInt(tokens[2]) > 9 || Integer.parseInt(tokens[2]) < 0)) {
-                                    System.out.println("The smart device was not found");
+                                    return "The smart device was not found";
                                 } else {
                                     String stopRecName = tokens[1];
                                     int stopRecId = Integer.parseInt(tokens[2]);
                                     SmartDevice stopRecDevice = findDevice(stopRecName, stopRecId, devices);
                                     if (stopRecDevice.getStatus() == Status.OFF) {
-                                        System.out.println("You can't change the status of the " + stopRecDevice.getClass().getSimpleName() + " " + stopRecDevice.getDeviceId() + " while it is off");
+                                        return "You can't change the status of the " + stopRecDevice.getClass().getSimpleName() + " " + stopRecDevice.getDeviceId() + " while it is off";
                                     } else {
                                         if (stopRecDevice instanceof Camera) {
                                             ((Camera) stopRecDevice).stopRecording();
                                         } else {
-                                            System.out.println(stopRecName + " " + stopRecId + " is not a camera");
+                                            return stopRecName + " " + stopRecId + " is not a camera";
                                         }
                                     }
                                 }
@@ -298,14 +308,16 @@ public class SmartHomeManagementSystem {
                             break;
 
                         default:
-                            System.out.println("Invalid command");
-                            break;
+                            return "Invalid command";
+
                     }
                 } catch (Exception e) {
-                    System.out.println("Invalid command");
+                    return "Invalid command";
                 }
             }
         }
+
+        return "";
     }
 }
 
