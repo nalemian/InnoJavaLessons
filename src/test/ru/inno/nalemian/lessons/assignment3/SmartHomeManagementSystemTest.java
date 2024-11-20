@@ -39,21 +39,21 @@ class SmartHomeManagementSystemTestTestErrorOutput {
     }
 
     @Test
-    void testFindDevice() {
+    void testFindDeviceAndCheckDefault() {
 
         var sha = new SmartHomeManagementSystem();
         var items = SmartHomeManagementSystem.generateListByTask();
 
-        assertNotNull(sha.findDevice("Light", 0, items));
-        assertNotNull(sha.findDevice("Light", 1, items));
-        assertNotNull(sha.findDevice("Light", 2, items));
-        assertNotNull(sha.findDevice("Light", 3, items));
-        assertNotNull(sha.findDevice("Camera", 4, items));
-        assertNotNull(sha.findDevice("Camera", 5, items));
-        assertNotNull(sha.findDevice("Heater", 6, items));
-        assertNotNull(sha.findDevice("Heater", 7, items));
-        assertNotNull(sha.findDevice("Heater", 8, items));
-        assertNotNull(sha.findDevice("Heater", 9, items));
+        validateLight(sha.findDevice("Light", 0, items));
+        validateLight(sha.findDevice("Light", 1, items));
+        validateLight(sha.findDevice("Light", 2, items));
+        validateLight(sha.findDevice("Light", 3, items));
+        validateCamera(sha.findDevice("Camera", 4, items));
+        validateCamera(sha.findDevice("Camera", 5, items));
+        validateHeater(sha.findDevice("Heater", 6, items));
+        validateHeater(sha.findDevice("Heater", 7, items));
+        validateHeater(sha.findDevice("Heater", 8, items));
+        validateHeater(sha.findDevice("Heater", 9, items));
     }
 
     @Test
@@ -65,5 +65,41 @@ class SmartHomeManagementSystemTestTestErrorOutput {
         assertEquals("Charging a non-chargeable device", sha.handleCommand(
                 "StartCharging Heater 1", List.of(heater))
         );
+    }
+
+    private void validateLight(SmartDevice device) {
+        assertNotNull(device);
+        assertEquals(Status.ON, device.getStatus());
+
+        if (device instanceof Light light) {
+            assertEquals(BrightnessLevel.LOW, light.getBrightnessLevel());
+            assertEquals(LightColor.YELLOW, light.getLightColor());
+        } else {
+            fail("device is not a light");
+        }
+    }
+
+    private void validateCamera(SmartDevice device) {
+        assertNotNull(device);
+        assertEquals(Status.ON, device.getStatus());
+
+        if (device instanceof Camera camera) {
+            assertFalse(camera.isCharging());
+            assertFalse(camera.isRecording());
+            assertEquals(45, camera.getAngle());
+        } else {
+            fail("device is not a camera");
+        }
+    }
+
+    private void validateHeater(SmartDevice device) {
+        assertNotNull(device);
+        assertEquals(Status.ON, device.getStatus());
+
+        if (device instanceof Heater heater) {
+            assertEquals(20, heater.getTemperature());
+        } else {
+            fail("device is not a camera");
+        }
     }
 }
