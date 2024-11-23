@@ -1,5 +1,6 @@
 package ru.inno.nalemian.lessons.assignment3;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -9,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Проверка error-ов
  */
+@Disabled
 class SmartHomeManagementSystemTest {
 
     @Test

@@ -9,20 +9,25 @@ import java.util.Scanner;
  * A system for managing smart home elements
  */
 public class SmartHomeManagementSystem {
+    private List<SmartDevice> devices;
+
+    public SmartHomeManagementSystem(List<SmartDevice> devices) {
+        this.devices = devices;
+    }
+
     /**
      * The main entry point of the program, it initializes the smart devices and processes user commands
      * in a loop until the user ends the program
      */
     public static void main(String[] args) {
-        List<SmartDevice> devices = generateListByTask();
-        SmartHomeManagementSystem system = new SmartHomeManagementSystem();
+        SmartHomeManagementSystem system = new SmartHomeManagementSystem(generateListByTask());
         Scanner scanner = new Scanner(System.in);
         while (true) {
             String command = scanner.nextLine();
             if (command.equals("end")) {
                 break;
             } else {
-                system.handleCommand(command, devices);
+                system.handleCommand(command);
             }
         }
     }
@@ -207,9 +212,8 @@ public class SmartHomeManagementSystem {
      * Handles the issued command and performs the corresponding action
      *
      * @param commandLine a string containing the command parameters
-     * @param devices     the list of smart devices
      */
-    public void handleCommand(String commandLine, List<SmartDevice> devices) {
+    public void handleCommand(String commandLine) {
         String[] commandElements = commandLine.split(" ");
         String action = commandElements[0];
         if (action.equals("DisplayAllStatus")) {
