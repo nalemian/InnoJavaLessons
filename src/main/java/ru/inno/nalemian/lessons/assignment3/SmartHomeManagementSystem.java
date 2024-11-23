@@ -9,7 +9,7 @@ import java.util.Scanner;
  * A system for managing smart home elements
  */
 public class SmartHomeManagementSystem {
-    private List<SmartDevice> devices;
+    private final List<SmartDevice> devices;
 
     public SmartHomeManagementSystem(List<SmartDevice> devices) {
         this.devices = devices;
@@ -91,21 +91,19 @@ public class SmartHomeManagementSystem {
      * @param numberOfCommandElements the required number of command elements
      * @return true if the command is valid, false otherwise
      */
-    public boolean checkFormatAndExistence(String[] commandElements, int numberOfCommandElements) {
+    private void checkFormatAndExistence(String[] commandElements, int numberOfCommandElements) {
+        //TODO убрать ограничение по min и max device
         final int maxDeviceId = 9;
         final int minDeviceId = 0;
         if (commandElements.length != numberOfCommandElements) {
-            System.out.println("Invalid command");
-            return false;
+            throw new CommandRuntimeException("Invalid command");
         } else {
-            if ((!(commandElements[1].equals("Camera")) & !(commandElements[1].equals("Heater"))
-                    & !(commandElements[1].equals("Light"))) || (Integer.parseInt(commandElements[2]) > maxDeviceId
+            if ((!commandElements[1].equals("Camera") && !commandElements[1].equals("Heater")
+                    && !commandElements[1].equals("Light")) || (Integer.parseInt(commandElements[2]) > maxDeviceId
                     || Integer.parseInt(commandElements[2]) < minDeviceId)) {
-                System.out.println("The smart device was not found");
-                return false;
+                throw new CommandRuntimeException("The smart device was not found");
             }
         }
-        return true;
     }
 
     /**
@@ -231,128 +229,123 @@ public class SmartHomeManagementSystem {
                 try {
                     switch (action) {
                         case "TurnOn":
-                            if (checkFormatAndExistence(commandElements, firstLenOfCommandLine)) {
-                                turnOnOff(commandElements, devices, 1);
-                            }
+                            checkFormatAndExistence(commandElements, firstLenOfCommandLine);
+                            turnOnOff(commandElements, devices, 1);
                             break;
 
                         case "TurnOff":
-                            if (checkFormatAndExistence(commandElements, firstLenOfCommandLine)) {
-                                turnOnOff(commandElements, devices, 2);
-                            }
+                            checkFormatAndExistence(commandElements, firstLenOfCommandLine);
+                            turnOnOff(commandElements, devices, 2);
                             break;
 
                         case "StartCharging":
-                            if (checkFormatAndExistence(commandElements, firstLenOfCommandLine)) {
-                                startStopCharging(commandElements, devices, 1);
-                            }
+                            checkFormatAndExistence(commandElements, firstLenOfCommandLine);
+                            startStopCharging(commandElements, devices, 1);
                             break;
 
                         case "StopCharging":
-                            if (checkFormatAndExistence(commandElements, firstLenOfCommandLine)) {
-                                startStopCharging(commandElements, devices, 2);
-                            }
+                            checkFormatAndExistence(commandElements, firstLenOfCommandLine);
+                            startStopCharging(commandElements, devices, 2);
                             break;
 
                         case "SetTemperature":
                             final int indexOfTemperature = 3;
-                            if (checkFormatAndExistence(commandElements, secondLenOfCommandLine)) {
-                                String tempName = commandElements[1];
-                                int tempId = Integer.parseInt(commandElements[2]);
-                                int temperature = Integer.parseInt(commandElements[indexOfTemperature]);
-                                SmartDevice tempDevice = findDevice(tempName, tempId, devices);
-                                if (status(tempDevice)) {
-                                    if (tempDevice instanceof Heater) {
-                                        ((Heater) tempDevice).setTemperature(temperature);
-                                    } else {
-                                        System.out.println(tempName + " " + tempId + " is not a heater");
-                                    }
+                            checkFormatAndExistence(commandElements, secondLenOfCommandLine);
+                            String tempName = commandElements[1];
+                            int tempId = Integer.parseInt(commandElements[2]);
+                            int temperature = Integer.parseInt(commandElements[indexOfTemperature]);
+                            SmartDevice tempDevice = findDevice(tempName, tempId, devices);
+                            if (status(tempDevice)) {
+                                if (tempDevice instanceof Heater) {
+                                    ((Heater) tempDevice).setTemperature(temperature);
+                                } else {
+                                    System.out.println(tempName + " " + tempId + " is not a heater");
                                 }
                             }
                             break;
 
                         case "SetBrightness":
                             final int indexOfBrightness = 3;
-                            if (checkFormatAndExistence(commandElements, secondLenOfCommandLine)) {
-                                String brightnessName = commandElements[1];
-                                int brightnessId = Integer.parseInt(commandElements[2]);
-                                String brightnessLevel = commandElements[indexOfBrightness];
-                                SmartDevice brightnessDevice = findDevice(brightnessName, brightnessId, devices);
-                                if (status(brightnessDevice)) {
-                                    if (brightnessDevice instanceof Light) {
-                                        if (brightnessLevel.equals("LOW") || brightnessLevel.equals("MEDIUM")
-                                                || brightnessLevel.equals("HIGH")) {
-                                            ((Light) brightnessDevice).setBrightnessLevel(
-                                                    BrightnessLevel.valueOf(brightnessLevel.toUpperCase()));
-                                        } else {
-                                            System.out.println("The brightness can only be one"
-                                                    + " of \"LOW\", \"MEDIUM\", or \"HIGH\"");
-                                        }
+                            checkFormatAndExistence(commandElements, secondLenOfCommandLine);
+                            String brightnessName = commandElements[1];
+                            int brightnessId = Integer.parseInt(commandElements[2]);
+                            String brightnessLevel = commandElements[indexOfBrightness];
+                            SmartDevice brightnessDevice = findDevice(brightnessName, brightnessId, devices);
+                            if (status(brightnessDevice)) {
+                                if (brightnessDevice instanceof Light) {
+                                    if (brightnessLevel.equals("LOW") || brightnessLevel.equals("MEDIUM")
+                                            || brightnessLevel.equals("HIGH")) {
+                                        ((Light) brightnessDevice).setBrightnessLevel(
+                                                BrightnessLevel.valueOf(brightnessLevel.toUpperCase()));
                                     } else {
-                                        System.out.println(brightnessName + " " + brightnessId + " is not a light");
+                                        System.out.println("The brightness can only be one"
+                                                + " of \"LOW\", \"MEDIUM\", or \"HIGH\"");
                                     }
+                                } else {
+                                    System.out.println(brightnessName + " " + brightnessId + " is not a light");
                                 }
                             }
                             break;
 
                         case "SetColor":
                             final int indexOfColor = 3;
-                            if (checkFormatAndExistence(commandElements, secondLenOfCommandLine)) {
-                                String colorName = commandElements[1];
-                                int colorId = Integer.parseInt(commandElements[2]);
-                                String color = commandElements[indexOfColor];
-                                SmartDevice colorDevice = findDevice(colorName, colorId, devices);
-                                if (status(colorDevice)) {
-                                    if (colorDevice instanceof Light) {
-                                        if (color.equals("YELLOW") || color.equals("WHITE")) {
-                                            ((Light) colorDevice).setLightColor(
-                                                    LightColor.valueOf(color.toUpperCase()));
-                                        } else {
-                                            System.out.println("The light color can"
-                                                    + " only be \"YELLOW\" or \"WHITE\"");
-                                        }
+                            checkFormatAndExistence(commandElements, secondLenOfCommandLine);
+                            String colorName = commandElements[1];
+                            int colorId = Integer.parseInt(commandElements[2]);
+                            String color = commandElements[indexOfColor];
+                            SmartDevice colorDevice = findDevice(colorName, colorId, devices);
+                            if (status(colorDevice)) {
+                                if (colorDevice instanceof Light) {
+                                    if (color.equals("YELLOW") || color.equals("WHITE")) {
+                                        ((Light) colorDevice).setLightColor(
+                                                LightColor.valueOf(color.toUpperCase()));
                                     } else {
-                                        System.out.println(colorName + " " + colorId + " is not a light");
+                                        System.out.println("The light color can"
+                                                + " only be \"YELLOW\" or \"WHITE\"");
                                     }
+                                } else {
+                                    System.out.println(colorName + " " + colorId + " is not a light");
                                 }
                             }
                             break;
 
                         case "SetAngle":
                             final int indexOfAngle = 3;
-                            if (checkFormatAndExistence(commandElements, secondLenOfCommandLine)) {
-                                String angleName = commandElements[1];
-                                int angleId = Integer.parseInt(commandElements[2]);
-                                int angle = Integer.parseInt(commandElements[indexOfAngle]);
-                                SmartDevice angleDevice = findDevice(angleName, angleId, devices);
-                                if (status(angleDevice)) {
-                                    if (angleDevice instanceof Camera) {
-                                        ((Camera) angleDevice).setCameraAngle(angle);
-                                    } else {
-                                        System.out.println(angleName + " " + angleId + " is not a camera");
-                                    }
+                            checkFormatAndExistence(commandElements, secondLenOfCommandLine);
+                            String angleName = commandElements[1];
+                            int angleId = Integer.parseInt(commandElements[2]);
+                            int angle = Integer.parseInt(commandElements[indexOfAngle]);
+                            SmartDevice angleDevice = findDevice(angleName, angleId, devices);
+                            if (status(angleDevice)) {
+                                if (angleDevice instanceof Camera) {
+                                    ((Camera) angleDevice).setCameraAngle(angle);
+                                } else {
+                                    System.out.println(angleName + " " + angleId + " is not a camera");
                                 }
+
                             }
                             break;
 
                         case "StartRecording":
-                            if (checkFormatAndExistence(commandElements, firstLenOfCommandLine)) {
-                                startStopRecording(commandElements, devices, 1);
-                            }
+                            checkFormatAndExistence(commandElements, firstLenOfCommandLine);
+                            startStopRecording(commandElements, devices, 1);
                             break;
 
 
                         case "StopRecording":
-                            if (checkFormatAndExistence(commandElements, firstLenOfCommandLine)) {
-                                startStopRecording(commandElements, devices, 2);
-                            }
+                            checkFormatAndExistence(commandElements, firstLenOfCommandLine);
+                            startStopRecording(commandElements, devices, 2);
                             break;
 
                         default:
                             System.out.println("Invalid command");
                             break;
                     }
-                } catch (Exception e) {
+                } catch (
+                        CommandRuntimeException e) {
+                    System.out.println(e.getMessage());
+                } catch (
+                        Exception e) {
                     System.out.println("Invalid command");
                 }
             } else {
@@ -441,7 +434,7 @@ interface Controllable {
 abstract class SmartDevice implements Controllable {
     private Status status;
     private int deviceId;
-    private static int numberOfDevices = 0;
+    private static final int numberOfDevices = 0;
 
     public SmartDevice(Status status) {
         this.status = status;
