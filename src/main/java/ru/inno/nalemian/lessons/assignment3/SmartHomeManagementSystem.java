@@ -1,18 +1,19 @@
 package ru.inno.nalemian.lessons.assignment3;
 
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * A system for managing smart home elements
  */
 public class SmartHomeManagementSystem {
-    private final List<SmartDevice> devices;
+    private final Map<String, SmartDevice> devices;
 
     public SmartHomeManagementSystem(List<SmartDevice> devices) {
-        this.devices = devices;
+        this.devices = new HashMap<>();
+        for (SmartDevice device : devices) {
+            this.devices.put(device.getClass().getSimpleName() + device.getDeviceId(), device);
+        }
     }
 
     /**
@@ -70,18 +71,12 @@ public class SmartHomeManagementSystem {
     /**
      * Finds a smart device by its name and ID from a list of devices.
      *
-     * @param name    the name of the smart device
-     * @param id      the ID of the smart device
-     * @param devices the list of smart devices to search in
+     * @param name the name of the smart device
+     * @param id   the ID of the smart device
      * @return the matching SmartDevice if found, null otherwise
      */
-    public SmartDevice findDevice(String name, int id, List<SmartDevice> devices) {
-        for (SmartDevice device : devices) {
-            if (device.getClass().getSimpleName().equalsIgnoreCase(name) && device.getDeviceId() == id) {
-                return device;
-            }
-        }
-        return null;
+    private SmartDevice findDevice(String name, int id) {
+        return devices.get(name + id);
     }
 
     /**
@@ -110,13 +105,13 @@ public class SmartHomeManagementSystem {
      * Turns a smart device on or off based on the provided command
      *
      * @param commandElements the command elements to validate
-     * @param devices         the list of smart devices
      * @param command         the command (1 - turn on, 2 - turn off)
      */
-    public void turnOnOff(String[] commandElements, List<SmartDevice> devices, int command) {
+    public void turnOnOff(String[] commandElements, int command) {
         String turnOnOffName = commandElements[1];
         int turnOnOffId = Integer.parseInt(commandElements[2]);
-        SmartDevice turnOnOffDevice = findDevice(turnOnOffName, turnOnOffId, devices);
+
+        SmartDevice turnOnOffDevice = findDevice(turnOnOffName, turnOnOffId);
         if (turnOnOffDevice != null) {
             if (command == 1) {
                 if (turnOnOffDevice.isOn()) {
@@ -140,13 +135,12 @@ public class SmartHomeManagementSystem {
      * Starts or stops charging a smart device based on the provided command
      *
      * @param commandElements the command elements to validate
-     * @param devices         the list of smart devices
      * @param command         the command (1 - start charging, 2 - stop charging)
      */
-    public void startStopCharging(String[] commandElements, List<SmartDevice> devices, int command) {
+    public void startStopCharging(String[] commandElements, int command) {
         String chargingName = commandElements[1];
         int chargingId = Integer.parseInt(commandElements[2]);
-        SmartDevice chargingDevice = findDevice(chargingName, chargingId, devices);
+        SmartDevice chargingDevice = findDevice(chargingName, chargingId);
         if (chargingDevice != null) {
             if (chargingDevice instanceof Light || chargingDevice instanceof Camera) {
                 if (command == 1) {
@@ -186,13 +180,12 @@ public class SmartHomeManagementSystem {
      * Starts or stops recording for a camera device based on the provided command
      *
      * @param commandElements the command elements to validate
-     * @param devices         the list of smart devices
      * @param command         the command (1 - start recording, 2 - stop recording)
      */
-    public void startStopRecording(String[] commandElements, List<SmartDevice> devices, int command) {
+    private void startStopRecording(String[] commandElements, int command) {
         String startStopRecName = commandElements[1];
         int startStopRecId = Integer.parseInt(commandElements[2]);
-        SmartDevice startStopRecDevice = findDevice(startStopRecName, startStopRecId, devices);
+        SmartDevice startStopRecDevice = findDevice(startStopRecName, startStopRecId);
         if (status(startStopRecDevice)) {
             if (startStopRecDevice instanceof Camera) {
                 if (command == 1) {
@@ -218,8 +211,8 @@ public class SmartHomeManagementSystem {
             if (commandElements.length != 1) {
                 System.out.println("Invalid command");
             } else {
-                for (SmartDevice device : devices) {
-                    System.out.println(device.displayStatus());
+                for (SmartDevice value : devices.values()) {
+                    System.out.println(value.displayStatus());
                 }
             }
         } else {
@@ -230,22 +223,22 @@ public class SmartHomeManagementSystem {
                     switch (action) {
                         case "TurnOn":
                             checkFormatAndExistence(commandElements, firstLenOfCommandLine);
-                            turnOnOff(commandElements, devices, 1);
+                            turnOnOff(commandElements, 1);
                             break;
 
                         case "TurnOff":
                             checkFormatAndExistence(commandElements, firstLenOfCommandLine);
-                            turnOnOff(commandElements, devices, 2);
+                            turnOnOff(commandElements, 2);
                             break;
 
                         case "StartCharging":
                             checkFormatAndExistence(commandElements, firstLenOfCommandLine);
-                            startStopCharging(commandElements, devices, 1);
+                            startStopCharging(commandElements, 1);
                             break;
 
                         case "StopCharging":
                             checkFormatAndExistence(commandElements, firstLenOfCommandLine);
-                            startStopCharging(commandElements, devices, 2);
+                            startStopCharging(commandElements, 2);
                             break;
 
                         case "SetTemperature":
@@ -254,7 +247,7 @@ public class SmartHomeManagementSystem {
                             String tempName = commandElements[1];
                             int tempId = Integer.parseInt(commandElements[2]);
                             int temperature = Integer.parseInt(commandElements[indexOfTemperature]);
-                            SmartDevice tempDevice = findDevice(tempName, tempId, devices);
+                            SmartDevice tempDevice = findDevice(tempName, tempId);
                             if (status(tempDevice)) {
                                 if (tempDevice instanceof Heater) {
                                     ((Heater) tempDevice).setTemperature(temperature);
@@ -270,7 +263,7 @@ public class SmartHomeManagementSystem {
                             String brightnessName = commandElements[1];
                             int brightnessId = Integer.parseInt(commandElements[2]);
                             String brightnessLevel = commandElements[indexOfBrightness];
-                            SmartDevice brightnessDevice = findDevice(brightnessName, brightnessId, devices);
+                            SmartDevice brightnessDevice = findDevice(brightnessName, brightnessId);
                             if (status(brightnessDevice)) {
                                 if (brightnessDevice instanceof Light) {
                                     if (brightnessLevel.equals("LOW") || brightnessLevel.equals("MEDIUM")
@@ -293,7 +286,7 @@ public class SmartHomeManagementSystem {
                             String colorName = commandElements[1];
                             int colorId = Integer.parseInt(commandElements[2]);
                             String color = commandElements[indexOfColor];
-                            SmartDevice colorDevice = findDevice(colorName, colorId, devices);
+                            SmartDevice colorDevice = findDevice(colorName, colorId);
                             if (status(colorDevice)) {
                                 if (colorDevice instanceof Light) {
                                     if (color.equals("YELLOW") || color.equals("WHITE")) {
@@ -315,7 +308,7 @@ public class SmartHomeManagementSystem {
                             String angleName = commandElements[1];
                             int angleId = Integer.parseInt(commandElements[2]);
                             int angle = Integer.parseInt(commandElements[indexOfAngle]);
-                            SmartDevice angleDevice = findDevice(angleName, angleId, devices);
+                            SmartDevice angleDevice = findDevice(angleName, angleId);
                             if (status(angleDevice)) {
                                 if (angleDevice instanceof Camera) {
                                     ((Camera) angleDevice).setCameraAngle(angle);
@@ -328,13 +321,13 @@ public class SmartHomeManagementSystem {
 
                         case "StartRecording":
                             checkFormatAndExistence(commandElements, firstLenOfCommandLine);
-                            startStopRecording(commandElements, devices, 1);
+                            startStopRecording(commandElements, 1);
                             break;
 
 
                         case "StopRecording":
                             checkFormatAndExistence(commandElements, firstLenOfCommandLine);
-                            startStopRecording(commandElements, devices, 2);
+                            startStopRecording(commandElements, 2);
                             break;
 
                         default:
