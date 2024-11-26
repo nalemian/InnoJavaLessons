@@ -3,6 +3,10 @@ package ru.inno.nalemian.lessons.assignment3;
 
 import java.util.*;
 
+import static java.lang.Integer.max;
+import static java.lang.Integer.parseInt;
+import static java.lang.Math.min;
+
 /**
  * A system for managing smart home elements
  */
@@ -14,6 +18,7 @@ public class SmartHomeManagementSystem {
         for (SmartDevice device : devices) {
             this.devices.put(device.getClass().getSimpleName() + device.getDeviceId(), device);
         }
+        System.out.println(this.devices);
     }
 
     /**
@@ -28,7 +33,7 @@ public class SmartHomeManagementSystem {
             if (command.equals("end")) {
                 break;
             } else {
-                system.handleCommand(command);
+                System.out.println(system.handleCommand(command));
             }
         }
     }
@@ -76,26 +81,33 @@ public class SmartHomeManagementSystem {
      * @return the matching SmartDevice if found, null otherwise
      */
     private SmartDevice findDevice(String name, int id) {
+        if (devices.get(name + id) == null) {
+            throw new DeviceNotFoundException("The smart device was not found");
+        }
         return devices.get(name + id);
     }
 
     /**
      * Checks a command to ensure it matches the format and checks if the device exists
      *
-     * @param commandElements         the command elements to validate
+     * @param commandElements the command elements to validate
      * @param numberOfCommandElements the required number of command elements
-     * @return true if the command is valid, false otherwise
      */
     private void checkFormatAndExistence(String[] commandElements, int numberOfCommandElements) {
-        //TODO убрать ограничение по min и max device
-        final int maxDeviceId = 9;
-        final int minDeviceId = 0;
+        int maxDeviceId = -1000000000;
+        int minDeviceId = 1000000000;
         if (commandElements.length != numberOfCommandElements) {
             throw new CommandRuntimeException("Invalid command");
         } else {
+            for (Map.Entry<String, SmartDevice> entry : this.devices.entrySet()) {
+                String key = entry.getKey();
+                int index = parseInt(key.substring(key.length() - 1));
+                maxDeviceId = max(maxDeviceId, index);
+                minDeviceId = min(minDeviceId, index);
+            }
             if ((!commandElements[1].equals("Camera") && !commandElements[1].equals("Heater")
-                    && !commandElements[1].equals("Light")) || (Integer.parseInt(commandElements[2]) > maxDeviceId
-                    || Integer.parseInt(commandElements[2]) < minDeviceId)) {
+                    && !commandElements[1].equals("Light")) || (parseInt(commandElements[2]) > maxDeviceId
+                    || parseInt(commandElements[2]) < minDeviceId)) {
                 throw new CommandRuntimeException("The smart device was not found");
             }
         }
@@ -107,27 +119,22 @@ public class SmartHomeManagementSystem {
      * @param commandElements the command elements to validate
      * @param command         the command (1 - turn on, 2 - turn off)
      */
-    public void turnOnOff(String[] commandElements, int command) {
+    public String turnOnOff(String[] commandElements, int command) {
         String turnOnOffName = commandElements[1];
-        int turnOnOffId = Integer.parseInt(commandElements[2]);
-
+        int turnOnOffId = parseInt(commandElements[2]);
         SmartDevice turnOnOffDevice = findDevice(turnOnOffName, turnOnOffId);
-        if (turnOnOffDevice != null) {
-            if (command == 1) {
-                if (turnOnOffDevice.isOn()) {
-                    System.out.println(turnOnOffName + " " + turnOnOffId + " is already on");
-                } else {
-                    turnOnOffDevice.turnOn();
-                }
+        if (command == 1) {
+            if (turnOnOffDevice.isOn()) {
+                return turnOnOffName + " " + turnOnOffId + " is already on";
             } else {
-                if (!turnOnOffDevice.isOn()) {
-                    System.out.println(turnOnOffName + " " + turnOnOffId + " is already off");
-                } else {
-                    turnOnOffDevice.turnOff();
-                }
+                return turnOnOffDevice.turnOn();
             }
         } else {
-            System.out.println("The smart device was not found");
+            if (!turnOnOffDevice.isOn()) {
+                return turnOnOffName + " " + turnOnOffId + " is already off";
+            } else {
+                return turnOnOffDevice.turnOff();
+            }
         }
     }
 
@@ -137,22 +144,22 @@ public class SmartHomeManagementSystem {
      * @param commandElements the command elements to validate
      * @param command         the command (1 - start charging, 2 - stop charging)
      */
-    public void startStopCharging(String[] commandElements, int command) {
+    public String startStopCharging(String[] commandElements, int command) {
         String chargingName = commandElements[1];
-        int chargingId = Integer.parseInt(commandElements[2]);
+        int chargingId = parseInt(commandElements[2]);
         SmartDevice chargingDevice = findDevice(chargingName, chargingId);
         if (chargingDevice != null) {
             if (chargingDevice instanceof Light || chargingDevice instanceof Camera) {
                 if (command == 1) {
-                    ((Chargeable) chargingDevice).startCharging();
+                    return ((Chargeable) chargingDevice).startCharging();
                 } else {
-                    ((Chargeable) chargingDevice).stopCharging();
+                    return ((Chargeable) chargingDevice).stopCharging();
                 }
             } else {
-                System.out.println(chargingName + " " + chargingId + " is not chargeable");
+                return chargingName + " " + chargingId + " is not chargeable";
             }
         } else {
-            System.out.println("The smart device was not found");
+            return "The smart device was not found";
         }
     }
 
@@ -160,19 +167,16 @@ public class SmartHomeManagementSystem {
      * Checks the status of a smart device to determine if it is possible to perform an operation on it
      *
      * @param brightnessDevice the smart device to check
-     * @return true if the operation can proceed, false otherwise
      */
-    public boolean status(SmartDevice brightnessDevice) {
+    public String status(SmartDevice brightnessDevice) {
         if (brightnessDevice != null) {
             if (brightnessDevice.getStatus() == Status.OFF) {
-                System.out.println("You can't change the status of the " + brightnessDevice.getClass().getSimpleName()
-                        + " " + brightnessDevice.getDeviceId() + " while it is off");
-                return false;
+                return "You can't change the status of the " + brightnessDevice.getClass().getSimpleName()
+                        + " " + brightnessDevice.getDeviceId() + " while it is off";
             }
-            return true;
+            return "true";
         } else {
-            System.out.println("The smart device was not found");
-            return false;
+            return "The smart device was not found";
         }
     }
 
@@ -182,20 +186,23 @@ public class SmartHomeManagementSystem {
      * @param commandElements the command elements to validate
      * @param command         the command (1 - start recording, 2 - stop recording)
      */
-    private void startStopRecording(String[] commandElements, int command) {
+    private String startStopRecording(String[] commandElements, int command) {
         String startStopRecName = commandElements[1];
-        int startStopRecId = Integer.parseInt(commandElements[2]);
+        int startStopRecId = parseInt(commandElements[2]);
         SmartDevice startStopRecDevice = findDevice(startStopRecName, startStopRecId);
-        if (status(startStopRecDevice)) {
+        String res = status(startStopRecDevice);
+        if (res.equals("true")) {
             if (startStopRecDevice instanceof Camera) {
                 if (command == 1) {
-                    ((Camera) startStopRecDevice).startRecording();
+                    return ((Camera) startStopRecDevice).startRecording();
                 } else {
-                    ((Camera) startStopRecDevice).stopRecording();
+                    return ((Camera) startStopRecDevice).stopRecording();
                 }
             } else {
-                System.out.println(startStopRecName + " " + startStopRecId + " is not a camera");
+                return startStopRecName + " " + startStopRecId + " is not a camera";
             }
+        } else {
+            return res;
         }
     }
 
@@ -204,15 +211,15 @@ public class SmartHomeManagementSystem {
      *
      * @param commandLine a string containing the command parameters
      */
-    public void handleCommand(String commandLine) {
+    public String handleCommand(String commandLine) {
         String[] commandElements = commandLine.split(" ");
         String action = commandElements[0];
         if (action.equals("DisplayAllStatus")) {
             if (commandElements.length != 1) {
-                System.out.println("Invalid command");
+                return "Invalid command";
             } else {
                 for (SmartDevice value : devices.values()) {
-                    System.out.println(value.displayStatus());
+                    return value.displayStatus();
                 }
             }
         } else {
@@ -223,128 +230,129 @@ public class SmartHomeManagementSystem {
                     switch (action) {
                         case "TurnOn":
                             checkFormatAndExistence(commandElements, firstLenOfCommandLine);
-                            turnOnOff(commandElements, 1);
-                            break;
+                            return turnOnOff(commandElements, 1);
 
                         case "TurnOff":
                             checkFormatAndExistence(commandElements, firstLenOfCommandLine);
-                            turnOnOff(commandElements, 2);
-                            break;
+                            return turnOnOff(commandElements, 2);
 
                         case "StartCharging":
                             checkFormatAndExistence(commandElements, firstLenOfCommandLine);
-                            startStopCharging(commandElements, 1);
-                            break;
+                            return startStopCharging(commandElements, 1);
 
                         case "StopCharging":
                             checkFormatAndExistence(commandElements, firstLenOfCommandLine);
-                            startStopCharging(commandElements, 2);
-                            break;
+                            return startStopCharging(commandElements, 2);
 
                         case "SetTemperature":
                             final int indexOfTemperature = 3;
                             checkFormatAndExistence(commandElements, secondLenOfCommandLine);
                             String tempName = commandElements[1];
-                            int tempId = Integer.parseInt(commandElements[2]);
-                            int temperature = Integer.parseInt(commandElements[indexOfTemperature]);
+                            int tempId = parseInt(commandElements[2]);
+                            int temperature = parseInt(commandElements[indexOfTemperature]);
                             SmartDevice tempDevice = findDevice(tempName, tempId);
-                            if (status(tempDevice)) {
+                            String res = status(tempDevice);
+                            if (res.equals("true")) {
                                 if (tempDevice instanceof Heater) {
-                                    ((Heater) tempDevice).setTemperature(temperature);
+                                    return ((Heater) tempDevice).setTemperature(temperature);
                                 } else {
-                                    System.out.println(tempName + " " + tempId + " is not a heater");
+                                    return tempName + " " + tempId + " is not a heater";
                                 }
+                            } else {
+                                return res;
                             }
-                            break;
 
                         case "SetBrightness":
                             final int indexOfBrightness = 3;
                             checkFormatAndExistence(commandElements, secondLenOfCommandLine);
                             String brightnessName = commandElements[1];
-                            int brightnessId = Integer.parseInt(commandElements[2]);
+                            int brightnessId = parseInt(commandElements[2]);
                             String brightnessLevel = commandElements[indexOfBrightness];
                             SmartDevice brightnessDevice = findDevice(brightnessName, brightnessId);
-                            if (status(brightnessDevice)) {
+                            res = status(brightnessDevice);
+                            if (res.equals("true")) {
                                 if (brightnessDevice instanceof Light) {
                                     if (brightnessLevel.equals("LOW") || brightnessLevel.equals("MEDIUM")
                                             || brightnessLevel.equals("HIGH")) {
-                                        ((Light) brightnessDevice).setBrightnessLevel(
+                                        return ((Light) brightnessDevice).setBrightnessLevel(
                                                 BrightnessLevel.valueOf(brightnessLevel.toUpperCase()));
                                     } else {
-                                        System.out.println("The brightness can only be one"
-                                                + " of \"LOW\", \"MEDIUM\", or \"HIGH\"");
+                                        return "The brightness can only be one"
+                                                + " of \"LOW\", \"MEDIUM\", or \"HIGH\"";
                                     }
                                 } else {
-                                    System.out.println(brightnessName + " " + brightnessId + " is not a light");
+                                    return brightnessName + " " + brightnessId + " is not a light";
                                 }
+                            } else {
+                                return res;
                             }
-                            break;
 
                         case "SetColor":
                             final int indexOfColor = 3;
                             checkFormatAndExistence(commandElements, secondLenOfCommandLine);
                             String colorName = commandElements[1];
-                            int colorId = Integer.parseInt(commandElements[2]);
+                            int colorId = parseInt(commandElements[2]);
                             String color = commandElements[indexOfColor];
                             SmartDevice colorDevice = findDevice(colorName, colorId);
-                            if (status(colorDevice)) {
+                            res = status(colorDevice);
+                            if (res.equals("true")) {
                                 if (colorDevice instanceof Light) {
                                     if (color.equals("YELLOW") || color.equals("WHITE")) {
-                                        ((Light) colorDevice).setLightColor(
+                                        return ((Light) colorDevice).setLightColor(
                                                 LightColor.valueOf(color.toUpperCase()));
                                     } else {
-                                        System.out.println("The light color can"
-                                                + " only be \"YELLOW\" or \"WHITE\"");
+                                        return "The light color can"
+                                                + " only be \"YELLOW\" or \"WHITE\"";
                                     }
                                 } else {
-                                    System.out.println(colorName + " " + colorId + " is not a light");
+                                    return colorName + " " + colorId + " is not a light";
                                 }
+                            } else {
+                                return res;
                             }
-                            break;
 
                         case "SetAngle":
                             final int indexOfAngle = 3;
                             checkFormatAndExistence(commandElements, secondLenOfCommandLine);
                             String angleName = commandElements[1];
-                            int angleId = Integer.parseInt(commandElements[2]);
-                            int angle = Integer.parseInt(commandElements[indexOfAngle]);
+                            int angleId = parseInt(commandElements[2]);
+                            int angle = parseInt(commandElements[indexOfAngle]);
                             SmartDevice angleDevice = findDevice(angleName, angleId);
-                            if (status(angleDevice)) {
+                            res = status(angleDevice);
+                            if (res.equals("true")) {
                                 if (angleDevice instanceof Camera) {
-                                    ((Camera) angleDevice).setCameraAngle(angle);
+                                    return ((Camera) angleDevice).setCameraAngle(angle);
                                 } else {
-                                    System.out.println(angleName + " " + angleId + " is not a camera");
+                                    return angleName + " " + angleId + " is not a camera";
                                 }
 
+                            } else {
+                                return res;
                             }
-                            break;
 
                         case "StartRecording":
                             checkFormatAndExistence(commandElements, firstLenOfCommandLine);
-                            startStopRecording(commandElements, 1);
-                            break;
-
+                            return startStopRecording(commandElements, 1);
 
                         case "StopRecording":
                             checkFormatAndExistence(commandElements, firstLenOfCommandLine);
-                            startStopRecording(commandElements, 2);
-                            break;
+                            return startStopRecording(commandElements, 2);
 
                         default:
-                            System.out.println("Invalid command");
-                            break;
+                            return "Invalid command";
                     }
                 } catch (
-                        CommandRuntimeException e) {
-                    System.out.println(e.getMessage());
+                        CommandRuntimeException | DeviceNotFoundException e) {
+                    return e.getMessage();
                 } catch (
                         Exception e) {
-                    System.out.println("Invalid command");
+                    return "Invalid command";
                 }
             } else {
-                System.out.println("Invalid command");
+                return "Invalid command";
             }
         }
+        return "";
     }
 }
 
@@ -382,17 +390,13 @@ interface Chargeable {
 
     /**
      * Starts charging the device
-     *
-     * @return true if charging started successfully, false otherwise
      */
-    boolean startCharging();
+    String startCharging();
 
     /**
      * Stops charging the device
-     *
-     * @return true if charging stopped successfully, false otherwise
      */
-    boolean stopCharging();
+    String stopCharging();
 }
 
 /**
@@ -401,17 +405,13 @@ interface Chargeable {
 interface Controllable {
     /**
      * Turns off the device
-     *
-     * @return true if the device was successfully turned off, false otherwise
      */
-    boolean turnOff();
+    String turnOff();
 
     /**
      * Turns on the device
-     *
-     * @return true if the device was successfully turned on, false otherwise
      */
-    boolean turnOn();
+    String turnOn();
 
     /**
      * Checks if the device is on
@@ -457,25 +457,21 @@ abstract class SmartDevice implements Controllable {
     }
 
     @Override
-    public boolean turnOff() {
+    public String turnOff() {
         if (Status.OFF.equals(status)) {
-            System.out.println(getClass().getSimpleName() + " " + deviceId + " is already off");
-            return false;
+            return getClass().getSimpleName() + " " + deviceId + " is already off";
         }
         status = Status.OFF;
-        System.out.println(getClass().getSimpleName() + " " + deviceId + " is off");
-        return true;
+        return getClass().getSimpleName() + " " + deviceId + " is off";
     }
 
     @Override
-    public boolean turnOn() {
+    public String turnOn() {
         if (Status.ON.equals(status)) {
-            System.out.println(getClass().getSimpleName() + " " + deviceId + " is already on");
-            return false;
+            return getClass().getSimpleName() + " " + deviceId + " is already on";
         }
         status = Status.ON;
-        System.out.println(getClass().getSimpleName() + " " + deviceId + " is on");
-        return true;
+        return getClass().getSimpleName() + " " + deviceId + " is on";
     }
 
     @Override
@@ -517,12 +513,12 @@ class Light extends SmartDevice implements Chargeable {
      *
      * @param lightColor the light color to set
      */
-    public void setLightColor(LightColor lightColor) {
+    public String setLightColor(LightColor lightColor) {
         if (Status.OFF.equals(this.getStatus())) {
-            System.out.println("You can't change the status of the Light " + this.getDeviceId() + " while it is off");
+            return "You can't change the status of the Light " + this.getDeviceId() + " while it is off";
         } else {
             this.lightColor = lightColor;
-            System.out.println("Light " + this.getDeviceId() + " color is set to " + lightColor);
+            return "Light " + this.getDeviceId() + " color is set to " + lightColor;
         }
     }
 
@@ -535,12 +531,12 @@ class Light extends SmartDevice implements Chargeable {
      *
      * @param brightnessLevel the brightness level to set
      */
-    public void setBrightnessLevel(BrightnessLevel brightnessLevel) {
+    public String setBrightnessLevel(BrightnessLevel brightnessLevel) {
         if (Status.OFF.equals(this.getStatus())) {
-            System.out.println("You can't change the status of the Light " + this.getDeviceId() + " while it is off");
+            return "You can't change the status of the Light " + this.getDeviceId() + " while it is off";
         } else {
             this.brightnessLevel = brightnessLevel;
-            System.out.println("Light " + this.getDeviceId() + " brightness level is set to " + brightnessLevel);
+            return "Light " + this.getDeviceId() + " brightness level is set to " + brightnessLevel;
         }
     }
 
@@ -550,25 +546,21 @@ class Light extends SmartDevice implements Chargeable {
     }
 
     @Override
-    public boolean startCharging() {
+    public String startCharging() {
         if (charging) {
-            System.out.println("Light " + this.getDeviceId() + " is already charging");
-            return false;
+            return "Light " + this.getDeviceId() + " is already charging";
         }
         charging = true;
-        System.out.println("Light " + this.getDeviceId() + " is charging");
-        return true;
+        return "Light " + this.getDeviceId() + " is charging";
     }
 
     @Override
-    public boolean stopCharging() {
+    public String stopCharging() {
         if (!charging) {
-            System.out.println("Light " + this.getDeviceId() + " is not charging");
-            return false;
+            return "Light " + this.getDeviceId() + " is not charging";
         }
         charging = false;
-        System.out.println("Light " + this.getDeviceId() + " stopped charging");
-        return true;
+        return "Light " + this.getDeviceId() + " stopped charging";
     }
 
     @Override
@@ -601,20 +593,16 @@ class Heater extends SmartDevice {
      * Sets the temperature of the heater
      *
      * @param temperature the temperature to set
-     * @return true if the temperature was set successfully, false otherwise
      */
-    public boolean setTemperature(int temperature) {
+    public String setTemperature(int temperature) {
         if (Status.OFF.equals(this.getStatus())) {
-            System.out.println("You can't change the status of the Heater " + this.getDeviceId() + " while it is off");
-            return false;
+            return "You can't change the status of the Heater " + this.getDeviceId() + " while it is off";
         }
         if (temperature < MIN_HEATER_TEMP || temperature > MAX_HEATER_TEMP) {
-            System.out.println("Heater " + this.getDeviceId() + " temperature should be in the range [15, 30]");
-            return false;
+            return "Heater " + this.getDeviceId() + " temperature should be in the range [15, 30]";
         }
         this.temperature = temperature;
-        System.out.println("Heater " + this.getDeviceId() + " temperature is set to " + temperature);
-        return true;
+        return "Heater " + this.getDeviceId() + " temperature is set to " + temperature;
     }
 
     @Override
@@ -649,58 +637,44 @@ class Camera extends SmartDevice implements Chargeable {
      * Sets the angle of the camera
      *
      * @param angle the angle to set
-     * @return true if the angle was set successfully, false otherwise
      */
-    public boolean setCameraAngle(int angle) {
+    public String setCameraAngle(int angle) {
         if (this.getStatus() == Status.OFF) {
-            System.out.println("You can't change the status of the Camera " + this.getDeviceId() + " while it is off");
-            return false;
+            return "You can't change the status of the Camera " + this.getDeviceId() + " while it is off";
         }
         if (angle < MIN_CAMERA_ANGLE || angle > MAX_CAMERA_ANGLE) {
-            System.out.println("Camera " + this.getDeviceId() + " angle should be in the range [-60, 60]");
-            return false;
+            return "Camera " + this.getDeviceId() + " angle should be in the range [-60, 60]";
         }
         this.angle = angle;
-        System.out.println("Camera " + this.getDeviceId() + " angle is set to " + angle);
-        return true;
+        return "Camera " + this.getDeviceId() + " angle is set to " + angle;
     }
 
     /**
      * Starts recording on the camera
-     *
-     * @return true if recording started successfully, false otherwise
      */
-    public boolean startRecording() {
+    public String startRecording() {
         if (Status.OFF.equals(this.getStatus())) {
-            System.out.println("You can't change the status of the Camera " + this.getDeviceId() + " while it is off");
-            return false;
+            return "You can't change the status of the Camera " + this.getDeviceId() + " while it is off";
         }
         if (recording) {
-            System.out.println("Camera " + this.getDeviceId() + " is already recording");
-            return false;
+            return "Camera " + this.getDeviceId() + " is already recording";
         }
         recording = true;
-        System.out.println("Camera " + this.getDeviceId() + " started recording");
-        return true;
+        return "Camera " + this.getDeviceId() + " started recording";
     }
 
     /**
      * Stops recording on the camera
-     *
-     * @return true if recording stopped successfully, false otherwise
      */
-    public boolean stopRecording() {
+    public String stopRecording() {
         if (Status.OFF.equals(this.getStatus())) {
-            System.out.println("You can't change the status of the Camera " + this.getDeviceId() + " while it is off");
-            return false;
+            return "You can't change the status of the Camera " + this.getDeviceId() + " while it is off";
         }
         if (!recording) {
-            System.out.println("Camera " + this.getDeviceId() + " is not recording");
-            return false;
+            return "Camera " + this.getDeviceId() + " is not recording";
         }
         recording = false;
-        System.out.println("Camera " + this.getDeviceId() + " stopped recording");
-        return true;
+        return "Camera " + this.getDeviceId() + " stopped recording";
     }
 
     public boolean isRecording() {
@@ -714,25 +688,21 @@ class Camera extends SmartDevice implements Chargeable {
     }
 
     @Override
-    public boolean startCharging() {
+    public String startCharging() {
         if (charging) {
-            System.out.println("Camera " + this.getDeviceId() + " is already charging");
-            return false;
+            return "Camera " + this.getDeviceId() + " is already charging";
         }
-        System.out.println("Camera " + this.getDeviceId() + " is charging");
         charging = true;
-        return true;
+        return "Camera " + this.getDeviceId() + " is charging";
     }
 
     @Override
-    public boolean stopCharging() {
+    public String stopCharging() {
         if (!charging) {
-            System.out.println("Camera " + this.getDeviceId() + " is not charging");
-            return false;
+            return "Camera " + this.getDeviceId() + " is not charging";
         }
         charging = false;
-        System.out.println("Camera " + this.getDeviceId() + " stopped charging");
-        return true;
+        return "Camera " + this.getDeviceId() + " stopped charging";
     }
 
     @Override

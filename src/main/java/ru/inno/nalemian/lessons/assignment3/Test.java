@@ -1,16 +1,21 @@
 package ru.inno.nalemian.lessons.assignment3;
 
-public class Test {
-    public static String main(String[] args) {
-        String input = "123";
+import java.util.ArrayList;
+import java.util.List;
 
+public class Test {
+    public static void main(String[] args) {
         try {
-            int number = Integer.parseInt(input);
-        } catch (NumberFormatException e) {
-            return "Error: The input string is not a valid integer.";
+            final int size = 5;
+            final int testSize = 7;
+            List<Integer> list = new ArrayList<>(size);
+            for (int i = 0; i < testSize; i++) {
+                System.out.println(list.get(i));
+            }
+        } catch (CommandRuntimeException e) {
+            System.out.println(e.getMessage());
         }
 
-        return "Program continues...";
     }
 }
 
