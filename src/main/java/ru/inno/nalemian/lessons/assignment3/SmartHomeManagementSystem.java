@@ -604,6 +604,15 @@ class Heater extends SmartDevice {
         return "Heater " + this.getDeviceId() + " temperature is set to " + temperature;
     }
 
+    //TODO исправить комменты, дописать
+    public String executeSetTemperatureCommand(int temperature) {
+        if (setTemperature(temperature)) {
+            return "Heater " + this.getDeviceId() + " temperature is set to " + temperature;
+        } else {
+            throw new RuntimeException("Unknown error");
+        }
+    }
+
     @Override
     public String displayStatus() {
         return "Heater " + this.getDeviceId() + " is " + this.getStatus()
