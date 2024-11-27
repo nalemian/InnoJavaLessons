@@ -1,72 +1,69 @@
 package ru.inno.nalemian.lessons.assignment3;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static ru.inno.nalemian.lessons.assignment3.SmartHomeManagementSystem.generateListByTask;
 
 /**
  * Проверка error-ов
  */
-@Disabled
+
 class SmartHomeManagementSystemTest {
+    private final List<SmartDevice> devices = generateListByTask();
+
 
     @Test
     void testInvalidCommand() {
+        var sha = new SmartHomeManagementSystem(devices);
 
-        var sha = new SmartHomeManagementSystem();
-
-        assertEquals("Invalid command", sha.handleCommand("test", List.of()));
-        assertEquals("Invalid command", sha.handleCommand("TurnOn Camera", List.of()));
+        assertEquals("Invalid command", sha.handleCommand("test"));
+        assertEquals("Invalid command", sha.handleCommand("TurnOn Camera"));
 
     }
 
     @Test
     void smartDeviceWasNotFound() {
-        var sha = new SmartHomeManagementSystem();
+        var sha = new SmartHomeManagementSystem(devices);
 
-        assertEquals("The smart device was not found", sha.handleCommand("TurnOn Camera 1", List.of()));
-        assertEquals("The smart device was not found", sha.handleCommand("TurnOff Camera 1", List.of()));
-        assertEquals("The smart device was not found", sha.handleCommand("StartCharging Camera 1", List.of()));
-        assertEquals("The smart device was not found", sha.handleCommand("StopCharging Camera 1", List.of()));
-        assertEquals("The smart device was not found", sha.handleCommand("StopCharging Camera 1", List.of()));
-        assertEquals("The smart device was not found", sha.handleCommand("SetTemperature Heater 1 45", List.of()));
-        assertEquals("The smart device was not found", sha.handleCommand("SetBrightness Light 1 LOW", List.of()));
-        assertEquals("The smart device was not found", sha.handleCommand("SetColor Camera 1 WHITE", List.of()));
-        assertEquals("The smart device was not found", sha.handleCommand("SetAngle Camera 1 45", List.of()));
-        assertEquals("The smart device was not found", sha.handleCommand("StartRecording Camera 1", List.of()));
-        assertEquals("The smart device was not found", sha.handleCommand("StopRecording Camera 1", List.of()));
-    }
-
-    @Test
-    void testFindDeviceAndCheckDefault() {
-
-        var sha = new SmartHomeManagementSystem();
-        var items = SmartHomeManagementSystem.generateListByTask();
-
-        validateLight(sha.findDevice("Light", 0, items));
-        validateLight(sha.findDevice("Light", 1, items));
-        validateLight(sha.findDevice("Light", 2, items));
-        validateLight(sha.findDevice("Light", 3, items));
-        validateCamera(sha.findDevice("Camera", 4, items));
-        validateCamera(sha.findDevice("Camera", 5, items));
-        validateHeater(sha.findDevice("Heater", 6, items));
-        validateHeater(sha.findDevice("Heater", 7, items));
-        validateHeater(sha.findDevice("Heater", 8, items));
-        validateHeater(sha.findDevice("Heater", 9, items));
+        assertEquals("The smart device was not found", sha.handleCommand("TurnOn Camera 1"));
+        assertEquals("The smart device was not found", sha.handleCommand("TurnOff Camera 1"));
+        assertEquals("The smart device was not found", sha.handleCommand("StartCharging Camera 1"));
+        assertEquals("The smart device was not found", sha.handleCommand("StopCharging Camera 1"));
+        assertEquals("The smart device was not found", sha.handleCommand("StopCharging Camera 1"));
+        assertEquals("The smart device was not found", sha.handleCommand("SetTemperature Heater 1 45"));
+        assertEquals("The smart device was not found", sha.handleCommand("SetBrightness Light 5 LOW"));
+        assertEquals("The smart device was not found", sha.handleCommand("SetColor Camera 1 WHITE"));
+        assertEquals("The smart device was not found", sha.handleCommand("SetAngle Camera 1 45"));
+        assertEquals("The smart device was not found", sha.handleCommand("StartRecording Camera 1"));
+        assertEquals("The smart device was not found", sha.handleCommand("StopRecording Camera 1"));
     }
 
     @Test
     void chargingNonChargeable() {
-        var sha = new SmartHomeManagementSystem();
+        var sha = new SmartHomeManagementSystem(devices);
 
         Heater heater = new Heater(Status.ON, 20);
         heater.setDeviceId(1);
-        assertEquals("Heater 1 is not chargeable", sha.handleCommand(
-                "StartCharging Heater 1", List.of(heater))
+        assertEquals("Heater 8 is not chargeable", sha.handleCommand(
+                "StartCharging Heater 8")
         );
+    }
+
+    @Test
+    void validation() {
+        var sha = new SmartHomeManagementSystem(devices);
+        Light light = new Light(Status.ON, false, BrightnessLevel.LOW, LightColor.YELLOW);
+        light.setDeviceId(1);
+        Heater heater = new Heater(Status.ON, 20);
+        heater.setDeviceId(8);
+        Camera camera = new Camera(Status.ON, false, false, 45);
+        camera.setDeviceId(5);
+        validateLight(light);
+        validateCamera(camera);
+        validateHeater(heater);
     }
 
     private void validateLight(SmartDevice device) {

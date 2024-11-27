@@ -18,7 +18,6 @@ public class SmartHomeManagementSystem {
         for (SmartDevice device : devices) {
             this.devices.put(device.getClass().getSimpleName() + device.getDeviceId(), device);
         }
-        System.out.println(this.devices);
     }
 
     /**
@@ -192,11 +191,11 @@ public class SmartHomeManagementSystem {
         SmartDevice startStopRecDevice = findDevice(startStopRecName, startStopRecId);
         String res = status(startStopRecDevice);
         if (res.equals("true")) {
-            if (startStopRecDevice instanceof Camera) {
+            if (startStopRecDevice instanceof Camera camera) {
                 if (command == 1) {
-                    return ((Camera) startStopRecDevice).startRecording();
+                    return camera.startRecording();
                 } else {
-                    return ((Camera) startStopRecDevice).stopRecording();
+                    return camera.stopRecording();
                 }
             } else {
                 return startStopRecName + " " + startStopRecId + " is not a camera";
@@ -352,7 +351,7 @@ public class SmartHomeManagementSystem {
                 return "Invalid command";
             }
         }
-        return "";
+        return null;
     }
 }
 
