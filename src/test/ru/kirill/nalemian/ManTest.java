@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -62,5 +63,13 @@ public class ManTest {
                 .map(man -> man.name)
                 .collect(Collectors.joining(", "))
         );
+    }
+
+    @Test
+    void printGroupedByDadName() {
+        var result = generatePeople(5, 10).stream()
+                .collect(Collectors.groupingBy(man -> Optional.ofNullable(man.dad).map(dad -> dad.name).orElse("John Doe")));
+
+        System.out.println(1);
     }
 }
