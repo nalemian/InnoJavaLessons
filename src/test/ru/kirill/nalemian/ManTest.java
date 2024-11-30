@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class ManTest {
     List<Man> generatePeople(int numOfParents, int numOfChildren) {
@@ -56,19 +57,10 @@ public class ManTest {
 
     @Test
     void printParentsWithOneChild() {
-        final boolean[] isFirst = {true};
-        generatePeople(5, 10).stream()
+        System.out.println(generatePeople(5, 10).stream()
                 .filter(man -> man.children.size() == 1)
-                .filter(man -> man.dad == null && man.mom == null)
                 .map(man -> man.name)
-                .forEach(name -> {
-                    if (isFirst[0]) {
-                        System.out.print(name);
-                        isFirst[0] = false;
-                    } else {
-                        System.out.print(", " + name);
-                    }
-                });
-        System.out.println();
+                .collect(Collectors.joining(", "))
+        );
     }
 }
