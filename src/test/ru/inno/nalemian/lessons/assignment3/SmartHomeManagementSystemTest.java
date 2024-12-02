@@ -1,5 +1,6 @@
 package ru.inno.nalemian.lessons.assignment3;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -12,13 +13,18 @@ import static ru.inno.nalemian.lessons.assignment3.SmartHomeManagementSystem.gen
  */
 
 class SmartHomeManagementSystemTest {
-    private final List<SmartDevice> devices = generateListByTask();
+    private SmartHomeManagementSystem sha;
+    private List<SmartDevice> devices;
+
+    @BeforeEach
+    void generateListForTests() {
+        devices = generateListByTask();
+        sha = new SmartHomeManagementSystem(devices);
+    }
 
 
     @Test
     void testInvalidCommand() {
-        var sha = new SmartHomeManagementSystem(devices);
-
         assertEquals("Invalid command", sha.handleCommand("test"));
         assertEquals("Invalid command", sha.handleCommand("TurnOn Camera"));
 
@@ -26,8 +32,6 @@ class SmartHomeManagementSystemTest {
 
     @Test
     void smartDeviceWasNotFound() {
-        var sha = new SmartHomeManagementSystem(devices);
-
         assertEquals("The smart device was not found", sha.handleCommand("TurnOn Camera 1"));
         assertEquals("The smart device was not found", sha.handleCommand("TurnOff Camera 1"));
         assertEquals("The smart device was not found", sha.handleCommand("StartCharging Camera 1"));
@@ -43,8 +47,6 @@ class SmartHomeManagementSystemTest {
 
     @Test
     void chargingNonChargeable() {
-        var sha = new SmartHomeManagementSystem(devices);
-
         Heater heater = new Heater(Status.ON, 20);
         heater.setDeviceId(1);
         assertEquals("Heater 8 is not chargeable", sha.handleCommand(
@@ -54,7 +56,6 @@ class SmartHomeManagementSystemTest {
 
     @Test
     void validation() {
-        var sha = new SmartHomeManagementSystem(devices);
         Light light = new Light(Status.ON, false, BrightnessLevel.LOW, LightColor.YELLOW);
         light.setDeviceId(1);
         Heater heater = new Heater(Status.ON, 20);
