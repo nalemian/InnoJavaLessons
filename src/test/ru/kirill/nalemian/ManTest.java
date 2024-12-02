@@ -35,32 +35,32 @@ public class ManTest {
             int childrenOfParents = random.nextInt(3);
             for (int counter = 0; counter < childrenOfParents && childIndex <= numOfChildren; counter++) {
                 Man child = children.get(childIndex - 1);
-                child.mom = mom;
-                child.dad = dad;
-                mom.children.add(child);
-                dad.children.add(child);
+                child.setMom(mom);
+                child.setDad(dad);
+                mom.getChildren().add(child);
+                dad.getChildren().add(child);
                 childIndex++;
             }
         }
 
-        people.forEach(man -> System.out.println(man.name));
+        people.forEach(man -> System.out.println(man.getName()));
         return people;
     }
 
     @Test
     void printOrphans() {
         generatePeople(5, 10).stream()
-                .filter(man -> man.name.contains("child"))
-                .filter(man -> man.dad == null && man.mom == null)
-                .map(man -> man.name)
+                .filter(man -> man.getName().contains("child"))
+                .filter(man -> man.getDad() == null && man.getMom() == null)
+                .map(Man::getName)
                 .forEach(System.out::println);
     }
 
     @Test
     void printParentsWithOneChild() {
         System.out.println(generatePeople(5, 10).stream()
-                .filter(man -> man.children.size() == 1)
-                .map(man -> man.name)
+                .filter(man -> man.getChildren().size() == 1)
+                .map(Man::getName)
                 .collect(Collectors.joining(", "))
         );
     }
@@ -68,8 +68,34 @@ public class ManTest {
     @Test
     void printGroupedByDadName() {
         var result = generatePeople(5, 10).stream()
-                .collect(Collectors.groupingBy(man -> Optional.ofNullable(man.dad).map(dad -> dad.name).orElse("John Doe")));
-
-        System.out.println(1);
+                .collect(Collectors.groupingBy(man -> Optional.ofNullable(man.getDad()).map(Man::getName).orElse("John Doe")));
     }
+
+    @Test
+    void printUsingToString() {
+        generatePeople(5, 10).forEach(System.out::println);
+    }
+
+
+    @Test
+    void collectingAndThenExample() {
+        String namesAsString = generatePeople(5, 10).stream()
+                .map(Man::getName)
+                .collect(Collectors.collectingAndThen(
+                        Collectors.joining(", "),
+                        result -> "Names: " + result
+                ));
+        System.out.println(namesAsString);
+    }
+
+    @Test
+    void filteringExample() {
+        List<String> childrenNames = generatePeople(5, 10).stream()
+                .collect(Collectors.filtering(
+                        man -> man.getName().contains("child"),
+                        Collectors.mapping(Man::getName, Collectors.toList())
+                ));
+        System.out.println(childrenNames);
+    }
+
 }
