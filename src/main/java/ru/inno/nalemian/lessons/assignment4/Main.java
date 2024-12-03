@@ -67,21 +67,15 @@ public class Main {
                     throw new InvalidInputsException();
                 }
                 String[] animalInfo = testLine.split("\\s+");
+                if (animalInfo.length != testLine.split(" ").length) {
+                    throw new InvalidInputsException();
+                }
                 if (animalInfo.length != 4) {
                     throw new InvalidNumberOfAnimalParametersException();
                 }
                 float weight = Float.parseFloat(animalInfo[1]);
-                if (weight > 200 || weight < 5) {
-                    throw new WeightOutOfBoundsException();
-                }
                 float speed = Float.parseFloat(animalInfo[2]);
-                if (speed > 60 || speed < 5) {
-                    throw new SpeedOutOfBoundsException();
-                }
                 float energy = Float.parseFloat(animalInfo[3]);
-                if (energy > 100 || energy < 0) {
-                    throw new EnergyOutOfBoundsException();
-                }
                 switch (animalInfo[0]) {
                     case "Lion":
                         animals.add(new Lion(weight, speed, energy));
@@ -94,6 +88,15 @@ public class Main {
                         break;
                     default:
                         throw new InvalidInputsException();
+                }
+                if (weight > 200 || weight < 5) {
+                    throw new WeightOutOfBoundsException();
+                }
+                if (speed > 60 || speed < 5) {
+                    throw new SpeedOutOfBoundsException();
+                }
+                if (energy > 100 || energy < 0) {
+                    throw new EnergyOutOfBoundsException();
                 }
             }
             if (reader.readLine() != null) {
