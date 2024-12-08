@@ -145,12 +145,12 @@ public class Main {
     }
 
     /**
-     * Removes animals with zero energy from the simulation
+     * Removes animals with zero or negative energy from the simulation
      *
      * @param animals the list of animals to filter
      */
     private static void removeDeadAnimals(List<Animal> animals) {
-        animals.removeIf(animal -> animal.getEnergy() == 0);
+        animals.removeIf(animal -> animal.getEnergy() <= 0);
     }
 
     /**
